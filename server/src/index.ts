@@ -1,7 +1,11 @@
+import { config as loadEnv } from 'dotenv';
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import { readFileSync, existsSync } from 'node:fs';
-import { join, extname } from 'node:path';
+import { join, extname, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+loadEnv({ path: resolve(dirname(fileURLToPath(import.meta.url)), '../../.env') });
+
 import { getStored, isStale, ageSeconds } from './state.js';
 import { handleIngest } from './ingest.js';
 import { createWss, startStaleChecker } from './ws.js';

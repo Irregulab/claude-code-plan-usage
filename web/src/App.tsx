@@ -3,7 +3,7 @@ import { useUsageSocket } from './hooks/useUsageSocket.ts';
 import { BlockGauge } from './components/BlockGauge.tsx';
 import { BurnRateCard } from './components/BurnRateCard.tsx';
 import { WeeklyCard } from './components/WeeklyCard.tsx';
-import { ModelsCard } from './components/ModelsCard.tsx';
+import { PlanUsageCard } from './components/PlanUsageCard.tsx';
 import type { ActiveBlock } from './types.ts';
 
 const STATUS_LABEL: Record<string, string> = {
@@ -43,7 +43,7 @@ export default function App() {
         <BlockGauge block={block} />
         <BurnRateCard block={block} prev={prevBlock} />
         <WeeklyCard weekly={snapshot?.weekly ?? null} daily={snapshot?.daily ?? []} />
-        <ModelsCard block={block} />
+        <PlanUsageCard planUsage={snapshot?.planUsage ?? null} />
       </div>
 
       <footer className="footer">

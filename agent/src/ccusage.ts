@@ -1,6 +1,7 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import type { UsageSnapshot, ActiveBlock, DailyPoint, WeeklyTotals } from '@claude-usage/shared';
+import { fetchPlanUsage } from './oauth-usage.js';
 
 const execFileAsync = promisify(execFile);
 
@@ -44,15 +45,16 @@ type CcDayRow = {
 };
 
 export async function fetchSnapshot(host: string, agentVersion: string): Promise<UsageSnapshot> {
-  const [blocksRaw, weeklyRaw, dailyRaw] = await Promise.allSettled([
-    runCcusage(['blocks', '--active']),
-    runCcusage(['weekly']),
-    runCcusage(['daily', '--since', sevenDaysAgo()]),
+  const [blocksRaw, weeklyRaw, dailyRaw, planUsage] = await Promise.all([
+    runCcusage(['blocks', '--active']).catch((e): unknown => ({ __error: String(e) })),
+    runCcusage(['weekly']).catch((e): unknown => ({ __error: String(e) })),
+    runCcusage(['daily', '--since', sevenDaysAgo()]).catch((e): unknown => ({ __error: String(e) })),
+    fetchPlanUsage(),
   ]);
 
   let activeBlock: ActiveBlock | null = null;
-  if (blocksRaw.status === 'fulfilled') {
-    const data = blocksRaw.value as { blocks?: CcBlock[] };
+  if (blocksRaw && !(blocksRaw as { __error?: string }).__error) {
+    const data = blocksRaw as { blocks?: CcBlock[] };
     const block = data.blocks?.[0];
     if (block?.isActive) {
       const endTime = new Date(block.startTime);
@@ -75,8 +77,8 @@ export async function fetchSnapshot(host: string, agentVersion: string): Promise
   }
 
   let weekly: WeeklyTotals | null = null;
-  if (weeklyRaw.status === 'fulfilled') {
-    const data = weeklyRaw.value as { weekly?: CcWeekRow[] };
+  if (weeklyRaw && !(weeklyRaw as { __error?: string }).__error) {
+    const data = weeklyRaw as { weekly?: CcWeekRow[] };
     const rows = data.weekly ?? [];
     const last = rows[rows.length - 1];
     if (last) {
@@ -89,8 +91,8 @@ export async function fetchSnapshot(host: string, agentVersion: string): Promise
   }
 
   const daily: DailyPoint[] = [];
-  if (dailyRaw.status === 'fulfilled') {
-    const data = dailyRaw.value as { daily?: CcDayRow[] };
+  if (dailyRaw && !(dailyRaw as { __error?: string }).__error) {
+    const data = dailyRaw as { daily?: CcDayRow[] };
     for (const d of data.daily ?? []) {
       daily.push({
         date: d.date,
@@ -107,5 +109,6 @@ export async function fetchSnapshot(host: string, agentVersion: string): Promise
     activeBlock,
     weekly,
     daily,
+    planUsage,
   };
 }

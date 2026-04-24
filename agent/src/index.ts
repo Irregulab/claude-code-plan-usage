@@ -1,4 +1,9 @@
+import { config as loadEnv } from 'dotenv';
 import { hostname } from 'node:os';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+loadEnv({ path: resolve(dirname(fileURLToPath(import.meta.url)), '../../.env') });
 
 const SERVER_URL = process.env.SERVER_URL ?? 'http://localhost:8787';
 const AGENT_TOKEN = process.env.AGENT_TOKEN ?? '';

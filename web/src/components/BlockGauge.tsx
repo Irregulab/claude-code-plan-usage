@@ -33,11 +33,6 @@ export function BlockGauge({ block }: Props) {
   const hRemain = Math.floor(block.remainingMinutes / 60);
   const mRemain = block.remainingMinutes % 60;
 
-  const cacheTotal = block.tokenCounts.cacheCreationInputTokens + block.tokenCounts.cacheReadInputTokens;
-  const cacheHit = cacheTotal > 0
-    ? Math.round((block.tokenCounts.cacheReadInputTokens / cacheTotal) * 100)
-    : 0;
-
   return (
     <div className="card block-gauge">
       <div className="card-title">Active Block</div>
@@ -77,8 +72,8 @@ export function BlockGauge({ block }: Props) {
           <span className="stat-key">output tokens</span>
         </div>
         <div className="stat">
-          <span className="stat-val">{cacheHit}%</span>
-          <span className="stat-key">cache hit</span>
+          <span className="stat-val">{fmt(block.totalTokens)}</span>
+          <span className="stat-key">total tokens</span>
         </div>
         <div className="stat">
           <span className="stat-val">{fmtCost(block.projection.totalCost)}</span>

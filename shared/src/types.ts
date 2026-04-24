@@ -36,6 +36,18 @@ export type WeeklyTotals = {
   weekStart: string;
 };
 
+export type PlanUtilization = {
+  utilization: number; // 0..100 (reported by Anthropic)
+  resetsAt: string | null; // ISO
+};
+
+export type PlanUsage = {
+  fiveHour: PlanUtilization | null;
+  sevenDay: PlanUtilization | null;
+  sevenDayOpus: PlanUtilization | null;
+  error: string | null;
+};
+
 export type UsageSnapshot = {
   schemaVersion: 1;
   generatedAt: string;
@@ -46,6 +58,7 @@ export type UsageSnapshot = {
   activeBlock: ActiveBlock | null;
   weekly: WeeklyTotals | null;
   daily: DailyPoint[];
+  planUsage: PlanUsage;
 };
 
 export type ServerEnvelope =

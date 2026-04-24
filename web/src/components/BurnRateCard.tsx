@@ -13,6 +13,13 @@ function trend(curr: number, prev: number | null): string {
   return '→';
 }
 
+function shortModel(m: string): string {
+  return m
+    .replace('claude-', '')
+    .replace('-20251001', '')
+    .replace('-20250219', '');
+}
+
 export function BurnRateCard({ block, prev }: Props) {
   if (!block) {
     return (
@@ -27,6 +34,11 @@ export function BurnRateCard({ block, prev }: Props) {
   const prevTokPerMin = prev ? Math.round(prev.burnRate.tokensPerMinute) : null;
   const costPerHour = block.burnRate.costPerHour;
   const prevCostPerHour = prev?.burnRate.costPerHour ?? null;
+
+  const cacheTotal = block.tokenCounts.cacheCreationInputTokens + block.tokenCounts.cacheReadInputTokens;
+  const efficiency = cacheTotal > 0
+    ? Math.round((block.tokenCounts.cacheReadInputTokens / cacheTotal) * 100)
+    : 0;
 
   return (
     <div className="card burn-rate">
@@ -45,17 +57,37 @@ export function BurnRateCard({ block, prev }: Props) {
         </div>
       </div>
 
-      <div className="stat-row">
+      <div className="burn-models">
+        <div className="burn-models-row">
+          <span className="burn-models-label">Models</span>
+          <div className="model-list-compact">
+            {block.models.map((m) => (
+              <span key={m} className="model-chip-compact">{shortModel(m)}</span>
+            ))}
+          </div>
+        </div>
+        <div className="burn-models-row">
+          <span className="burn-models-label">Cache hit</span>
+          <div className="cache-inline">
+            <div className="bar-track bar-track-sm">
+              <div className="bar-fill cache-fill" style={{ width: `${efficiency}%` }} />
+            </div>
+            <span className="cache-pct-compact">{efficiency}%</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="stat-row stat-row-compact">
         <div className="stat">
-          <span className="stat-val">{fmt(block.tokenCounts.inputTokens)}</span>
-          <span className="stat-key">input tokens</span>
+          <span className="stat-val stat-val-sm">{fmt(block.tokenCounts.inputTokens)}</span>
+          <span className="stat-key">input</span>
         </div>
         <div className="stat">
-          <span className="stat-val">{fmt(block.tokenCounts.cacheReadInputTokens)}</span>
+          <span className="stat-val stat-val-sm">{fmt(block.tokenCounts.cacheReadInputTokens)}</span>
           <span className="stat-key">cache reads</span>
         </div>
         <div className="stat">
-          <span className="stat-val">{fmt(block.tokenCounts.cacheCreationInputTokens)}</span>
+          <span className="stat-val stat-val-sm">{fmt(block.tokenCounts.cacheCreationInputTokens)}</span>
           <span className="stat-key">cache writes</span>
         </div>
       </div>
