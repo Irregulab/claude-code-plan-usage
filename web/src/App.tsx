@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useUsageSocket } from './hooks/useUsageSocket.ts';
+import { useTheme } from './hooks/useTheme.ts';
 import { BlockGauge } from './components/BlockGauge.tsx';
 import { BurnRateCard } from './components/BurnRateCard.tsx';
 import { WeeklyCard } from './components/WeeklyCard.tsx';
 import { PlanUsageCard } from './components/PlanUsageCard.tsx';
+import { ThemeSwitcher } from './components/ThemeSwitcher.tsx';
 import type { ActiveBlock } from './types.ts';
 
 const STATUS_LABEL: Record<string, string> = {
@@ -15,6 +17,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 export default function App() {
   const { snapshot, receivedAt, stale, status } = useUsageSocket();
+  const { theme, setTheme } = useTheme();
   const prevBlockRef = useRef<ActiveBlock | null>(null);
   const [secondsSince, setSecondsSince] = useState(0);
 
@@ -34,6 +37,7 @@ export default function App() {
 
   return (
     <div className="dashboard">
+      <ThemeSwitcher theme={theme} setTheme={setTheme} />
       {stale && <div className="stale-banner">STALE — agent not pushing</div>}
       {!snapshot && status === 'connected' && (
         <div className="stale-banner waiting">WAITING FOR AGENT</div>
