@@ -2,6 +2,8 @@
 
 Full-screen dashboard that shows your Claude Code Pro/Max subscription usage in real time on a TV browser.
 
+![Midnight theme](docs/screenshots/theme-midnight.png)
+
 ```
 Local machine (Claude Code installed)        Remote server              TV browser
 ┌────────────────────────────────┐          ┌────────────┐          ┌──────────┐
@@ -82,6 +84,35 @@ Navigate to `https://your-server.com` in a fullscreen/kiosk browser.
 | `SERVER_URL` | `http://localhost:8787` | agent |
 | `POLL_MS` | `10000` | agent |
 | `AGENT_HOST_LABEL` | `hostname()` | agent |
+
+## Themes
+
+The dashboard ships with **5 themes**, selectable from the menu in the upper right corner.
+Layout, card positions and data are identical across themes — only colors, typography
+and accents change. Your choice persists in `localStorage` (`cc-usage-theme`).
+
+| Theme | Mode | Style | Font |
+|-------|------|-------|------|
+| **Midnight** | Dark | Default — calm navy with blue/teal accents | JetBrains Mono |
+| **Solar** | Light | Clean modern UI, indigo accents, soft shadows | Inter |
+| **Terminal** | Dark | CRT phosphor green, square corners, glow text | VT323 |
+| **Paper** | Light | Warm cream background, brown/olive serif | Lora |
+| **Synthwave** | Dark | Retro neon — deep purple with pink/cyan glow | Orbitron |
+
+### Midnight (default)
+![Midnight](docs/screenshots/theme-midnight.png)
+
+### Solar
+![Solar](docs/screenshots/theme-solar.png)
+
+### Terminal
+![Terminal](docs/screenshots/theme-terminal.png)
+
+### Paper
+![Paper](docs/screenshots/theme-paper.png)
+
+### Synthwave
+![Synthwave](docs/screenshots/theme-synthwave.png)
 
 ## Requirements
 
