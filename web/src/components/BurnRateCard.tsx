@@ -59,20 +59,17 @@ export function BurnRateCard({ block, prev }: Props) {
 
       <div className="burn-models">
         <div className="burn-models-row">
-          <span className="burn-models-label">Models</span>
-          <div className="model-list-compact">
-            {block.models.map((m) => (
-              <span key={m} className="model-chip-compact">{shortModel(m)}</span>
-            ))}
-          </div>
-        </div>
-        <div className="burn-models-row">
           <span className="burn-models-label">Cache hit</span>
           <div className="cache-inline">
             <div className="bar-track bar-track-sm">
               <div className="bar-fill cache-fill" style={{ width: `${efficiency}%` }} />
             </div>
             <span className="cache-pct-compact">{efficiency}%</span>
+          </div>
+          <div className="model-list-compact model-list-right">
+            {block.models.map((m) => (
+              <span key={m} className="model-chip-compact">{shortModel(m)}</span>
+            ))}
           </div>
         </div>
       </div>

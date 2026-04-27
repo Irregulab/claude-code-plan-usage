@@ -401,6 +401,11 @@ html, body, #root {
   gap: 4px;
 }
 
+.model-list-right {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
 .model-chip-compact {
   background: var(--bg);
   border: 1px solid var(--border);
