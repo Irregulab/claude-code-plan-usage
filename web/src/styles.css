@@ -494,6 +494,50 @@ html, body, #root {
   color: var(--text-faint);
 }
 
+.plan-row-time {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.7em;
+  color: var(--text-dim);
+}
+
+.plan-row-time-icon {
+  font-size: 0.95em;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+.bar-track-xs {
+  height: 4px;
+  flex: 1;
+  background: var(--bar-bg, var(--bg));
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.time-fill {
+  height: 100%;
+  background: var(--text-dim);
+  opacity: 0.55;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+.plan-row-time-pct {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  min-width: 2.5em;
+  text-align: right;
+}
+
+.plan-row-time-text {
+  color: var(--text-faint);
+  flex-shrink: 0;
+}
+
 /* ---- footer ---- */
 .footer {
   display: flex;

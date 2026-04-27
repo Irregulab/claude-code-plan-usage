@@ -20,7 +20,24 @@ function resetIn(resetsAt: string | null): string | null {
   return `${mins}m`;
 }
 
-function Row({ label, util }: { label: string; util: PlanUtilization | null }) {
+function timeElapsedPct(resetsAt: string | null, windowMs: number): number | null {
+  if (!resetsAt) return null;
+  const remaining = new Date(resetsAt).getTime() - Date.now();
+  if (!Number.isFinite(remaining)) return null;
+  const elapsed = windowMs - Math.max(0, remaining);
+  const pct = (elapsed / windowMs) * 100;
+  return Math.max(0, Math.min(100, pct));
+}
+
+function Row({
+  label,
+  util,
+  windowMs,
+}: {
+  label: string;
+  util: PlanUtilization | null;
+  windowMs: number;
+}) {
   if (!util) {
     return (
       <div className="plan-row">
@@ -37,6 +54,7 @@ function Row({ label, util }: { label: string; util: PlanUtilization | null }) {
   const pct = util.utilization;
   const capped = Math.min(100, pct);
   const reset = resetIn(util.resetsAt);
+  const timePct = timeElapsedPct(util.resetsAt, windowMs);
   return (
     <div className="plan-row">
       <div className="plan-row-header">
@@ -46,10 +64,22 @@ function Row({ label, util }: { label: string; util: PlanUtilization | null }) {
       <div className="bar-track bar-track-lg">
         <div className={`bar-fill plan-fill ${pctClass(pct)}`} style={{ width: `${capped}%` }} />
       </div>
-      {reset && <div className="plan-row-sub">resets in {reset}</div>}
+      {timePct !== null && (
+        <div className="plan-row-time">
+          <span className="plan-row-time-icon" aria-hidden="true">⏱</span>
+          <div className="bar-track bar-track-xs">
+            <div className="bar-fill time-fill" style={{ width: `${timePct}%` }} />
+          </div>
+          <span className="plan-row-time-pct">{timePct.toFixed(0)}%</span>
+          {reset && <span className="plan-row-time-text">{reset} left</span>}
+        </div>
+      )}
     </div>
   );
 }
+
+const FIVE_HOURS_MS = 5 * 60 * 60 * 1000;
+const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
 export function PlanUsageCard({ planUsage }: Props) {
   const hasAny = planUsage && (planUsage.fiveHour || planUsage.sevenDay || planUsage.sevenDayOpus);
@@ -60,9 +90,11 @@ export function PlanUsageCard({ planUsage }: Props) {
 
       {hasAny ? (
         <div className="plan-rows">
-          <Row label="5-hour window" util={planUsage?.fiveHour ?? null} />
-          <Row label="7-day · all models" util={planUsage?.sevenDay ?? null} />
-          {planUsage?.sevenDayOpus && <Row label="7-day · Opus only" util={planUsage.sevenDayOpus} />}
+          <Row label="5-hour window" util={planUsage?.fiveHour ?? null} windowMs={FIVE_HOURS_MS} />
+          <Row label="7-day · all models" util={planUsage?.sevenDay ?? null} windowMs={SEVEN_DAYS_MS} />
+          {planUsage?.sevenDayOpus && (
+            <Row label="7-day · Opus only" util={planUsage.sevenDayOpus} windowMs={SEVEN_DAYS_MS} />
+          )}
         </div>
       ) : (
         <div className="empty-msg">
