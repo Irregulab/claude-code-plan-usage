@@ -132,6 +132,36 @@ html, body, #root {
   gap: var(--gap);
 }
 
+/* ---- Burn-in guard (pixel orbiter + brief dim pulse) ----
+   Standard OLED protection used by LG/Samsung/Sony: shift the
+   whole canvas 1px on a 4-direction cycle so no LED renders the
+   exact same content for long. A short brightness dip every 60s
+   forces every pixel to change state for ~80ms — below the
+   threshold of conscious perception. Disabled when the user
+   asks for reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .dashboard {
+    animation:
+      pixel-orbit 240s steps(4, jump-none) infinite,
+      burn-pulse 60s linear infinite;
+    will-change: transform, filter;
+  }
+}
+
+@keyframes pixel-orbit {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(1px, 0); }
+  50%  { transform: translate(1px, 1px); }
+  75%  { transform: translate(0, 1px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes burn-pulse {
+  0%, 99.85% { filter: none; }
+  99.93%     { filter: brightness(0.85); }
+  100%       { filter: none; }
+}
+
 .stale-banner {
   background: var(--warn);
   color: #000;
