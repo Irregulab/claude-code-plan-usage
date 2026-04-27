@@ -7,6 +7,15 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
+- **Docker + Traefik deployment (alternative)** (`b861005`) — drop-in
+  alternative to the direct deploy. `docker compose up -d --build` brings up
+  `traefik:v3.3` (stock Docker Hub, Alpine-based) terminating `:80`/`:443`
+  with automatic Let's Encrypt HTTPS via the HTTP-01 challenge, in front of
+  a small multi-stage `node:22-alpine` image that builds the server inside
+  Docker via `pnpm deploy --legacy`. Server runs as the non-root `node`
+  user with a read-only filesystem. Agent still runs on the local Claude
+  Code machine. New files: `Dockerfile`, `docker-compose.yml`,
+  `.dockerignore`, `.env.docker.example`. Zero source-code changes.
 - **OLED burn-in protection** (`a3466be`, `0fb3108`) — pure-CSS screen-saver layer
   combining a 1 px pixel orbiter on a 4-direction cycle (60 s/step, 4 min full
   cycle) with a brief once-per-minute brightness pulse (`filter: brightness(0.85)`
