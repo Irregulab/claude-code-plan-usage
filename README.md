@@ -114,6 +114,38 @@ and accents change. Your choice persists in `localStorage` (`cc-usage-theme`).
 ### Synthwave
 ![Synthwave](docs/screenshots/theme-synthwave.png)
 
+## Burn-in protection (OLED / LED TVs)
+
+Because the dashboard is designed to be left on a TV for hours or days,
+it ships with a built-in screen-saver layer that mitigates **OLED burn-in**
+and LED image retention. It runs unconditionally — no toggle, no JS,
+pure CSS — and it disables itself automatically when the user has set
+`prefers-reduced-motion: reduce`.
+
+Two complementary techniques are combined:
+
+1. **Pixel orbiter** — the entire dashboard is translated by **1 px** on a
+   4-direction cycle (top-left → top-right → bottom-right → bottom-left),
+   one step per **60 s**, full cycle every **4 minutes**. This is the
+   exact same principle TV manufacturers ship under the names *Pixel
+   Shift* (Samsung / Sony) and *Screen Shift* (LG): static labels and
+   numbers never sit on the same physical sub-pixel for long, so wear
+   is spread out.
+2. **Brief brightness pulse** — once per minute the canvas dips to
+   `filter: brightness(0.85)` for ≈80 ms (≈5 frames at 60 Hz). Below
+   the threshold of conscious perception but enough to force every LED
+   off its steady-state drive level, breaking the always-on luminance
+   pattern that drives burn-in.
+
+The shift amount is small enough that nothing visibly moves and the
+1 px translation never exposes an edge (the page background fills
+behind the dashboard). Together the two techniques cover both the
+**spatial** (pixel position) and **temporal** (luminance) sources of
+burn-in described in OLED manufacturer documentation.
+
+If you'd rather opt out (e.g. on a non-OLED display), set
+`prefers-reduced-motion: reduce` in your OS or browser settings.
+
 ## Requirements
 
 - Node ≥ 20 on both agent machine and server
