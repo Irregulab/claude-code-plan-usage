@@ -1,0 +1,42 @@
+services:
+  traefik:
+    image: traefik:v3.3
+    restart: unless-stopped
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.le.acme.httpchallenge=true
+      - --certificatesresolvers.le.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.le.acme.email=${LETSENCRYPT_EMAIL}
+      - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-acme:/letsencrypt
+
+  server:
+    build: .
+    restart: unless-stopped
+    read_only: true
+    environment:
+      - PORT=8787
+      - AGENT_TOKEN=${AGENT_TOKEN}
+      - STALE_MS=${STALE_MS:-60000}
+      - STALE_CHECK_MS=${STALE_CHECK_MS:-15000}
+    expose:
+      - "8787"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.cc-usage.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.cc-usage.entrypoints=websecure
+      - traefik.http.routers.cc-usage.tls.certresolver=le
+      - traefik.http.services.cc-usage.loadbalancer.server.port=8787
+
+volumes:
+  traefik-acme:

@@ -37,6 +37,13 @@ Opens:
 
 ## Production deployment
 
+There are two equivalent ways to deploy the server. Same code, same build output — just packaged differently.
+
+- **Direct** (below) — best when you already have Node ≥ 20 on the server, want to integrate with an existing nginx/Caddy/systemd setup, or prefer not to depend on Docker. Smallest moving-parts footprint.
+- **[Docker + Traefik](#deploy-with-docker--traefik-alternative)** — best for a fresh remote VPS where you want HTTPS in one command. The host needs only Docker; the build happens inside the image, so no Node/pnpm on the host. Trades a Docker dependency for skipping nginx + certbot + Node setup.
+
+In both modes, the agent still runs directly on your Claude Code machine (see [Run the agent](#3-run-the-agent-on-your-claude-code-machine)) — it needs the local macOS Keychain or `~/.claude/.credentials.json`, which a remote container can't reach.
+
 ### 1. Build
 
 ```bash
@@ -72,6 +79,73 @@ To run as a background service on macOS, create a `launchd` plist in `~/Library/
 ### 4. Open on TV
 
 Navigate to `https://your-server.com` in a fullscreen/kiosk browser.
+
+## Deploy with Docker + Traefik (alternative)
+
+A drop-in alternative to the direct deployment that gives you automatic HTTPS via
+Let's Encrypt with **no extra reverse-proxy setup** and **no Node/pnpm on the host** —
+the build happens inside Docker.
+
+The Compose stack uses two stock Docker Hub Alpine images:
+
+- `traefik:v3.3` — terminates `:80`/`:443`, redirects HTTP→HTTPS, fetches and renews
+  Let's Encrypt certificates via the HTTP-01 challenge.
+- `node:22-alpine` — base for the server image. The included `Dockerfile` is a small
+  multi-stage build that installs the workspace, runs `pnpm build`, then ships only
+  the compiled `dist/` and production deps in the runtime stage. The container runs
+  as the non-root `node` user with a read-only filesystem (the server is stateless).
+
+### Prerequisites
+
+- A host with Docker Engine + Compose plugin installed.
+- A domain whose A/AAAA record points at the host.
+- Ports 80 and 443 reachable from the public internet (Let's Encrypt HTTP-01
+  needs port 80).
+
+### Run
+
+```bash
+cp .env.docker.example .env.docker
+# edit .env.docker — set DOMAIN, LETSENCRYPT_EMAIL, AGENT_TOKEN
+
+docker compose --env-file .env.docker up -d --build
+```
+
+That's it. Traefik will fetch a cert on first request to `https://$DOMAIN` and the
+dashboard becomes available there.
+
+To check progress:
+
+```bash
+docker compose --env-file .env.docker logs -f traefik   # ACME / cert issuance
+docker compose --env-file .env.docker logs -f server    # agent ingest hits
+```
+
+### Run the agent
+
+The agent is **not** containerised — it runs directly on your Claude Code machine
+exactly as in the [direct deployment](#3-run-the-agent-on-your-claude-code-machine).
+Just point it at the Docker host:
+
+```bash
+SERVER_URL=https://your-domain.com
+AGENT_TOKEN=<same-as-.env.docker>
+```
+
+### When to choose this over the direct deploy
+
+Pick Docker + Traefik if any of these apply:
+
+- You're starting from a fresh VPS and don't want to install Node, pnpm, nginx,
+  and certbot just to run this.
+- You want HTTPS with auto-renewal handled for you.
+- You're comfortable with Docker as a dependency on the server.
+
+Stick with the direct deploy if:
+
+- You already have a reverse proxy (nginx/Caddy/Cloudflare Tunnel) handling TLS.
+- You'd rather run a plain `node` process under systemd.
+- You don't want Docker on the host.
 
 ## Environment variables
 
